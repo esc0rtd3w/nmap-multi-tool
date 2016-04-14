@@ -1,0 +1,213 @@
+#!/bin/sh
+
+# Find IP Addresses For Windows Machines 
+# Part of Nmap Multi Tool
+# esc0rtd3w 2016
+
+
+ipBlock1=0
+ipBlock2=0
+ipBlock3=0
+ipBlock4=0
+ip=0.0.0.0
+subnet=0
+
+dumpPath=$PWD/nmap-windows-targets
+output=$dumpPath/$ipBlock1.$ipBlock2.x.x.txt
+outputTemp=$dumpPath/$ipBlock1.$ipBlock2.x.x.tmp
+
+mkdir $dumpPath
+
+
+block1(){
+
+	rm $outputTemp
+
+	clear
+	echo "Enter IP Block 1"
+	echo ""
+	echo ""
+	echo "IP Address: $ipBlock1.$ipBlock2.$ipBlock3.$ipBlock4"
+	echo ""
+	echo "Block 1: $ipBlock1.x.x.x"
+	echo ""
+	read ipBlock1
+	block2
+}
+
+
+block2(){
+	clear
+	echo "Enter IP Block 2"
+	echo ""
+	echo ""
+	echo "IP Address: $ipBlock1.$ipBlock2.$ipBlock3.$ipBlock4"
+	echo ""
+	echo "Block 2: x.$ipBlock2.x.x"
+	echo ""
+	read ipBlock2
+	block3
+}
+
+
+block3(){
+	clear
+	echo "Enter IP Block 3"
+	echo ""
+	echo ""
+	echo "IP Address: $ipBlock1.$ipBlock2.$ipBlock3.$ipBlock4"
+	echo ""
+	echo "Block 3: x.x.$ipBlock3.x"
+	echo ""
+	read ipBlock3
+	block4
+}
+
+
+block4(){
+	clear
+	echo "Enter IP Block 4 (Default 1)"
+	echo ""
+	echo ""
+	echo "IP Address: $ipBlock1.$ipBlock2.$ipBlock3.$ipBlock4"
+	echo ""
+	echo "Block 4: x.x.x.$ipBlock4"
+	echo ""
+	read ipBlock4
+
+	output=$dumpPath/$ipBlock1.$ipBlock2.x.x.txt
+	outputTemp=$dumpPath/$ipBlock1.$ipBlock2.x.x.tmp
+
+	newIP
+}
+
+
+changeBlock(){
+	clear
+	echo "Edit Which Block? [1].[2].[3].[4]"
+	echo ""
+	echo "IP Address: $ipBlock1.$ipBlock2.$ipBlock3.$ipBlock4"
+	echo ""
+	echo ""
+	echo "When Done, Press D and ENTER"
+	echo ""
+	echo ""
+	read blockEdit
+
+	case "$blockEdit" in
+
+		"")
+		changeBlock
+		;;
+
+		"d" | "D")
+		cleanOutput
+		;;
+
+		"1")
+		block1
+		;;
+
+		"2")
+		block2
+		;;
+
+		"3")
+		block3
+		;;
+
+		"4")
+		block4
+		;;
+
+		*)
+		changeBlock
+		;;
+
+
+	esac
+}
+
+
+noIP(){
+	clear
+	echo "No Windows Machines Found!"
+	echo ""
+	echo ""
+	echo ""
+	echo "Press ENTER to continue...."
+	echo ""
+	read pause
+
+	block1
+}
+
+
+newIP(){
+	# Build IP Address
+	ip=$ipBlock1.$ipBlock2.$ipBlock3.$ipBlock4
+
+	getSubnet
+}
+
+
+getSubnet(){
+
+	clear
+	echo "Enter Subnet Value"
+	echo ""
+	echo "Common: 24"
+	echo ""
+	read subnet
+
+	case "$subnet" in
+		"")
+		getSubnet
+		;;
+
+		*)
+		dumpTarget
+	;;
+	esac
+}
+
+
+dumpTarget(){
+	clear
+	echo "Dumping Windows Targets From $ip/$subnet"
+	echo ""
+	echo "Output File: $output...."
+	echo ""
+
+	nmap -n -PN -p445 --max-rtt-timeout 500ms $ip/$subnet -T4 -oG - | grep 'open'>>$outputTemp
+
+	isBlank=$(cat $outputTemp)
+
+	case "$isBlank" in
+		"")
+		noIP
+		;;
+
+		*)
+		changeBlock
+		;;
+	esac
+}
+
+
+cleanOutput(){
+	echo "">$output
+	while read -r line
+	do
+	    name="$line"
+	    cleanList=$(echo "$name" | head -c 22 | cut -f 2 -d ":" | cut -f 1 -d "(" | cut -f 2 -d " ")
+	echo $cleanList>>$output
+	done < "$outputTemp"
+
+	rm $outputTemp
+}
+
+
+block1
+
+
