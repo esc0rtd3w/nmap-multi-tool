@@ -1,9 +1,5 @@
 #!/bin/sh
 
-# Find IP Addresses For Windows Machines 
-# Part of Nmap Multi Tool
-# esc0rtd3w 2016
-
 
 ipBlock1=0
 ipBlock2=0
@@ -66,7 +62,7 @@ block3(){
 
 block4(){
 	clear
-	echo "Enter IP Block 4 (Default 1)"
+	echo "Enter IP Block 4 (Default 0)"
 	echo ""
 	echo ""
 	echo "IP Address: $ipBlock1.$ipBlock2.$ipBlock3.$ipBlock4"
@@ -89,7 +85,7 @@ changeBlock(){
 	echo "IP Address: $ipBlock1.$ipBlock2.$ipBlock3.$ipBlock4"
 	echo ""
 	echo ""
-	echo "When Done, Press D and ENTER"
+	echo "When Done, Press D and ENTER to build new list"
 	echo ""
 	echo ""
 	read blockEdit
